@@ -10,5 +10,9 @@
     "test": "mocha --recursive './**/*.test.mjs'"
   },
   "author": "George Kpai",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "chai": "^4.3.10",
+    "mocha": "^10.2.0"
+  }
 }
