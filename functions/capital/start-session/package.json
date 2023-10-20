@@ -1,0 +1,14 @@
+{
+  "name": "start-session",
+  "version": "1.0.0",
+  "description": "Start a capital.com api session",
+  "main": "startSession.mjs",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "mocha --recursive './**/*.test.mjs'"
+  },
+  "author": "George Kpai",
+  "license": "MIT"
+}
