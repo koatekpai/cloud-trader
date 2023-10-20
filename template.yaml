@@ -1,41 +1,50 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: >
-  cloud-trader-app
+  cloud-trader
 
-  Sample SAM Template for cloud-trader-app
+  App that enables interaction with capital.com API for viewing market information, 
+  execute trade transactions and develop automated trading strategies.
+
+  IMPORTANT: This template/app assumes you have created the following Parameter Store parameters on aws with correct values:
+  - /cloud-trader/capitalDemoUrl  -> Type STRING
+  - /cloud-trader/identifier      -> Type STRING
+  - /cloud-trader/key             -> Type SECURESTRING
+  - /cloud-trader/password        -> Type SECURESTRING
   
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
-    Timeout: 3
+    Runtime: nodejs18.x
+    Timeout: 15             # TODO: Check if reduced time between 3 to 5 seconds would be sufficient.
+    MemorySize: 128
+    Architectures:
+      - x86_64
 
 Resources:
-  HelloWorldFunction:
-    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
-    Properties:
-      CodeUri: hello-world/
-      Handler: app.lambdaHandler
-      Runtime: nodejs18.x
-      Architectures:
-        - x86_64
-      Events:
-        HelloWorld:
-          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
-          Properties:
-            Path: /hello
-            Method: get
+  ############################################################################  ->  State Machines
 
-Outputs:
-  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
-  # Find out more about other implicit resources you can reference within SAM
-  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
-  HelloWorldApi:
-    Description: "API Gateway endpoint URL for Prod stage for Hello World function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
-  HelloWorldFunction:
-    Description: "Hello World Lambda Function ARN"
-    Value: !GetAtt HelloWorldFunction.Arn
-  HelloWorldFunctionIamRole:
-    Description: "Implicit IAM Role created for Hello World function"
-    Value: !GetAtt HelloWorldFunctionRole.Arn
+
+  ############################################################################  ->  Lambda Functions
+  StartCapitalSession:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: StartCapitalSessionFn
+      CodeUri: functions/capital/start-session/
+      Handler: startSession.handler
+
+  ############################################################################  ->  Role/Policy for Lambda fn to use
+  ReadParameterStoreValues:       #--> Using explicit Policy definition. There is no standard Connector
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: ReadParameterStoreValues      
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+              - ssm:GetParameters
+              - ssm:GetParameter
+              - ssm:GetParametersByPath
+              # - ssm:PutParameter
+            Resource: '*'
