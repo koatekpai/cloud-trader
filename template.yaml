@@ -32,6 +32,8 @@ Resources:
       FunctionName: StartCapitalSessionFn
       CodeUri: functions/capital/start-session/
       Handler: startSession.handler
+      Policies: 
+        - !Ref ReadParameterStoreValues
 
   ############################################################################  ->  Role/Policy for Lambda fn to use
   ReadParameterStoreValues:       #--> Using explicit Policy definition. There is no standard Connector
