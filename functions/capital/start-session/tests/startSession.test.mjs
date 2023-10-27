@@ -3,6 +3,8 @@ import { expect } from 'chai';
 import sinon from 'sinon';
 
 describe('doStartSession unit tests', () => {
+    const event = {};
+
     afterEach(()=>{
         sinon.restore();
     })
@@ -17,10 +19,10 @@ describe('doStartSession unit tests', () => {
           }
         }));
         // -> WHEN
-        const result = await doStartSession('http://endpoint.com', 'DEMO-KEY', 'name@email.com', 'abc-123-!');
-        const jsonResult = JSON.parse(result);
+        const result = await doStartSession(event, 'http://endpoint.com', 'DEMO-KEY', 'name@email.com', 'abc-123-!');
+        
         // -> THEN
-        expect(jsonResult.CST).to.equal('1234567890');
-        expect(jsonResult.TOKEN).to.equal('qwertyuiopasdfghjkl');
+        expect(result.session.CST).to.equal('1234567890');
+        expect(result.session.TOKEN).to.equal('qwertyuiopasdfghjkl');
       });
 })

@@ -8,7 +8,9 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "mocha --recursive './**/*.test.mjs'"
+    "pretest": "powershell ./pre-test.ps1",
+    "posttest": "powershell ./post-test.ps1",
+    "test": "mocha --recursive ./**/*.test.mjs"
   },
   "author": "George Kpai",
   "license": "MIT",
