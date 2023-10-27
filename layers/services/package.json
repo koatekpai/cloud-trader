@@ -9,6 +9,8 @@
   "author": "George Kpai",
   "license": "MIT",
   "dependencies": {
-    "@aws-sdk/client-ssm": "^3.437.0"
+    "@aws-sdk/client-dynamodb": "^3.437.0",
+    "@aws-sdk/client-ssm": "^3.437.0",
+    "@aws-sdk/lib-dynamodb": "^3.437.0"
   }
 }
