@@ -29,6 +29,8 @@ Globals:
         CT_PASSWORD: /cloud-trader/password # TODO: Each user would persist as account settings in DB
         CT_DEMO_URL: /cloud-trader/capitalDemoUrl # TODO: Each user would persist as account settings in DB
         SESSION_ENDPOINT: /session
+        SESSION_TABLE_NAME: Session
+        SESSION_TABLE_KEY_VALUE: only1session
 
 Resources:
   ############################################################################  ->  State Machines
@@ -43,6 +45,20 @@ Resources:
       Handler: startSession.handler
       Policies: 
         - !Ref ReadParameterStoreValues
+
+  SaveSession:
+    Type: AWS::Serverless::Function
+    Connectors:
+      ToSessionTable:
+        Properties:
+          Destination:
+            Id: SessionTable
+          Permissions:
+            - Write
+    Properties:
+      FunctionName: SaveSession
+      CodeUri: functions/db/save-session/
+      Handler: saveSession.handler
 
   ############################################################################  ->  Role/Policy for Lambda fn to use
   ReadParameterStoreValues:       #--> Using explicit Policy definition. There is no standard Connector
@@ -69,3 +85,12 @@ Resources:
       ContentUri: './layers/services'
       CompatibleRuntimes:
         - nodejs18.x
+
+  ############################################################################  ->  Dynamo DBs
+  SessionTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      TableName: Session # MUST be thesame as SESSEION_TABLE_NAME enviromnent variable above!!!
+      PrimaryKey: # { sessionID: 'only1session' }
+        Name: sessionID
+        Type: String
