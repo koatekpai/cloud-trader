@@ -36,7 +36,7 @@ export const handler = async (event) => {
     const { Parameter: { Value: BASE_URL } } = await client.send(url_command);
 
     const url = BASE_URL + ENDPOINT;
-    return doStartSession(url, KEY, IDENTIFIER, PASSWORD);
+    return doStartSession(event, url, KEY, IDENTIFIER, PASSWORD);
 }
 
 /**
@@ -50,6 +50,7 @@ export const handler = async (event) => {
  *                   if the session is successfully started, or an error response otherwise.
  */
 export const doStartSession = async (
+    event = {},
     url = "http://endpoint.com",
     KEY = "DEMO-KEY",
     IDENTIFIER = "name@email.com",
@@ -86,10 +87,13 @@ export const doStartSession = async (
         const CST = response.headers.get('CST');
         const TOKEN = response.headers.get('X-SECURITY-TOKEN');
 
-        return JSON.stringify({
-            CST: CST,
-            TOKEN: TOKEN
-        })
+        return {
+            session: {
+                CST: CST,
+                TOKEN: TOKEN
+            },
+            data: event.data
+        }
     } catch (err) {   // TODO: Check better way of handling this error.
         // console.log(err);
         return {
