@@ -1,27 +1,11 @@
 /*global fetch*/
-import { GetParameterCommand, SSMClient } from '@aws-sdk/client-ssm';
+import { getParameter } from '../../opt/parameterStore.mjs';
 
-//-> crate commands for extracting parameter values
-const identifier_command = new GetParameterCommand({
-    Name: '/cloud-trader/identifier',
-    WithDecryption: false
-});
-const key_command = new GetParameterCommand({
-    Name: '/cloud-trader/key',
-    WithDecryption: true
-});
-const password_command = new GetParameterCommand({
-    Name: '/cloud-trader/password',
-    WithDecryption: true
-});
-const url_command = new GetParameterCommand({
-    Name: '/cloud-trader/capitalDemoUrl',
-    WithDecryption: false   
-});
-const REGION = process.env.AWS_REGION
-const client = new SSMClient({region: REGION})
-
-const ENDPOINT = '/session';
+const CT_IDENTIFIER = process.env.CT_IDENTIFIER;
+const CT_KEY = process.env.CT_KEY;
+const CT_PASSWORD = process.env.CT_PASSWORD;
+const CT_DEMO_URL = process.env.CT_DEMO_URL;
+const SESSION_ENDPOINT = process.env.SESSION_ENDPOINT;
 
 // CT_IDENTIFIER: /cloud-trader/identifier         # TODO: Each user would persist as account settings in DB
 // CT_KEY: /cloud-trader/key                       # TODO: Each user would persist as account settings in DB
@@ -30,12 +14,12 @@ const ENDPOINT = '/session';
 
 export const handler = async (event) => {
     // Run the commands and retrieve parameter store values
-    const { Parameter: { Value: IDENTIFIER } } = await client.send(identifier_command);
-    const { Parameter: { Value: KEY } } = await client.send(key_command);
-    const { Parameter: { Value: PASSWORD } } = await client.send(password_command);
-    const { Parameter: { Value: BASE_URL } } = await client.send(url_command);
+    const IDENTIFIER = await getParameter(CT_IDENTIFIER, false);
+    const KEY = await getParameter(CT_KEY, true);
+    const PASSWORD = await getParameter(CT_PASSWORD, true);
+    const BASE_URL = await getParameter(CT_DEMO_URL, false);
 
-    const url = BASE_URL + ENDPOINT;
+    const url = BASE_URL + SESSION_ENDPOINT;
     return doStartSession(event, url, KEY, IDENTIFIER, PASSWORD);
 }
 

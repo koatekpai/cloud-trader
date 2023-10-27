@@ -8,7 +8,9 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "mocha --recursive './**/*.test.mjs'"
+    "pretest": "powershell ./pre-test.ps1",
+    "posttest": "powershell ./post-test.ps1",
+    "test": "mocha --recursive ./**/*.test.mjs"
   },
   "author": "George Kpai",
   "license": "MIT",
@@ -19,8 +21,5 @@
     "chai": "^4.3.10",
     "mocha": "^10.2.0",
     "sinon": "^16.1.3"
-  },
-  "dependencies": {
-    "@aws-sdk/client-ssm": "^3.431.0"
   }
 }

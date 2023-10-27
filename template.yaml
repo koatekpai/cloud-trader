@@ -20,6 +20,15 @@ Globals:
     MemorySize: 128
     Architectures:
       - x86_64
+    Layers:
+      - !Ref ServicesLayer
+    Environment:
+      Variables:
+        CT_IDENTIFIER: /cloud-trader/identifier # TODO: Each user would persist as account settings in DB
+        CT_KEY: /cloud-trader/key # TODO: Each user would persist as account settings in DB
+        CT_PASSWORD: /cloud-trader/password # TODO: Each user would persist as account settings in DB
+        CT_DEMO_URL: /cloud-trader/capitalDemoUrl # TODO: Each user would persist as account settings in DB
+        SESSION_ENDPOINT: /session
 
 Resources:
   ############################################################################  ->  State Machines
@@ -50,3 +59,13 @@ Resources:
               - ssm:GetParametersByPath
               # - ssm:PutParameter
             Resource: '*'
+
+  ############################################################################  ->  Layers
+  ServicesLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: ServicesLayer
+      Description: All AWS services and utility functions used by Cloud-Trader app.
+      ContentUri: './layers/services'
+      CompatibleRuntimes:
+        - nodejs18.x
