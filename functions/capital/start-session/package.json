@@ -8,8 +8,6 @@
     "test": "tests"
   },
   "scripts": {
-    "pretest": "powershell ./pre-test.ps1",
-    "posttest": "powershell ./post-test.ps1",
     "test": "mocha --recursive ./**/*.test.mjs"
   },
   "author": "George Kpai",
