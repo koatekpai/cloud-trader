@@ -1,0 +1,11 @@
+{
+  "name": "services",
+  "version": "1.0.0",
+  "description": "Shared services and utilities amongst all Cloud-Trader features",
+  "type": "module",
+  "scripts": {
+    "test": "mocha --recursive './**/*.test.mjs'"
+  },
+  "author": "George Kpai",
+  "license": "MIT"
+}
