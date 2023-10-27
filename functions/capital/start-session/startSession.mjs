@@ -1,4 +1,5 @@
-import { GetParameterCommand, SSMClient as client } from '@aws-sdk/client-ssm';
+/*global fetch*/
+import { GetParameterCommand, SSMClient } from '@aws-sdk/client-ssm';
 
 //-> crate commands for extracting parameter values
 const identifier_command = new GetParameterCommand({
@@ -15,10 +16,12 @@ const password_command = new GetParameterCommand({
 });
 const url_command = new GetParameterCommand({
     Name: '/cloud-trader/capitalDemoUrl',
-    WithDecryption: false
+    WithDecryption: false   
 });
+const REGION = process.env.AWS_REGION
+const client = new SSMClient({region: REGION})
 
-const ENDPOINT = './session';
+const ENDPOINT = '/session';
 
 // CT_IDENTIFIER: /cloud-trader/identifier         # TODO: Each user would persist as account settings in DB
 // CT_KEY: /cloud-trader/key                       # TODO: Each user would persist as account settings in DB
@@ -74,9 +77,9 @@ export const doStartSession = async (
             const errCode = await response.json();
             return {
                 message: `
-            Error getting session from capital.com
-            Capital.com Error Code: ${errCode?.errorCode}
-          `
+                    Error getting session from capital.com
+                    Capital.com Error Code: ${errCode?.errorCode}
+                `
             }
         }
 
@@ -91,11 +94,11 @@ export const doStartSession = async (
         // console.log(err);
         return {
             message: `
-        Could not fetch with the following parameters: 
-          -> X-CAP-API-KEY: ${KEY}
-          -> IDENTIFIER: ${IDENTIFIER}
-          -> PASSWORD: ****** given password.
-        `
+            Could not fetch with the following parameters: 
+            -> X-CAP-API-KEY: ${KEY}
+            -> IDENTIFIER: ${IDENTIFIER}
+            -> PASSWORD: ****** given password.
+            `
         };
     }
 }
