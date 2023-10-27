@@ -1,0 +1,13 @@
+{
+  "name": "cloud-trader-app",
+  "version": "1.0.0",
+  "description": "App that interfaces with capital.com api",
+  "main": "functions/capital/start-session/startSession.mjs",
+  "scripts": {
+    "pretest": "powershell ./pre-test.ps1",
+    "posttest": "powershell ./post-test.ps1",
+    "test": "mocha --recursive './**/*.test.mjs'"
+  },
+  "author": "George Kpai",
+  "license": "MIT"
+}
