@@ -20,6 +20,8 @@ Globals:
     MemorySize: 128
     Architectures:
       - x86_64
+    Layers:
+      - !Ref ServicesLayer
 
 Resources:
   ############################################################################  ->  State Machines
@@ -50,3 +52,13 @@ Resources:
               - ssm:GetParametersByPath
               # - ssm:PutParameter
             Resource: '*'
+
+  ############################################################################  ->  Layers
+  ServicesLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: ServicesLayer
+      Description: All AWS services and utility functions used by Cloud-Trader app.
+      ContentUri: './layers/services'
+      CompatibleRuntimes:
+        - nodejs18.x
