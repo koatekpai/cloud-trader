@@ -1,4 +1,4 @@
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: >
   cloud-trader
@@ -11,12 +11,12 @@ Description: >
   - /cloud-trader/identifier      -> Type STRING
   - /cloud-trader/key             -> Type SECURESTRING
   - /cloud-trader/password        -> Type SECURESTRING
-  
+
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
     Runtime: nodejs18.x
-    Timeout: 15             # TODO: Check if reduced time between 3 to 5 seconds would be sufficient.
+    Timeout: 15 # TODO: Check if reduced time between 3 to 5 seconds would be sufficient.
     MemorySize: 128
     Architectures:
       - x86_64
@@ -31,19 +31,49 @@ Globals:
         SESSION_ENDPOINT: /session
         SESSION_TABLE_NAME: Session
         SESSION_TABLE_KEY_VALUE: only1session
+        MARKET_CATEGORIES_ENDPOINT: /marketnavigation
 
 Resources:
   ############################################################################  ->  State Machines
-
+  MarketCategoriesSM:
+    Type: AWS::Serverless::StateMachine
+    Properties:
+      Name: MarketCategoriesSM
+      DefinitionUri: state-machines/market-categories.asl.yaml
+      Type: STANDARD
+      DefinitionSubstitutions:
+        StartCapitalSessionArn: !GetAtt StartCapitalSession.Arn
+        GetDbSessionArn: !GetAtt GetDbSession.Arn
+        ValidateSessionArn: !GetAtt ValidateSession.Arn
+        SaveSessionArn: !GetAtt SaveSession.Arn
+        GetMarketCategoriesArn: !GetAtt GetMarketCategories.Arn
+      Events:
+        GatewayTrigger:
+          Type: Api
+          Properties:
+            Path: /get-top-markets
+            Method: GET
+            RestApiId: !Ref CloudTraderGateway
+      Policies:
+        - LambdaInvokePolicy:
+            FunctionName: !Ref StartCapitalSession
+        - LambdaInvokePolicy:
+            FunctionName: !Ref GetDbSession
+        - LambdaInvokePolicy:
+            FunctionName: !Ref ValidateSession
+        - LambdaInvokePolicy:
+            FunctionName: !Ref SaveSession
+        - LambdaInvokePolicy:
+            FunctionName: !Ref GetMarketCategories
 
   ############################################################################  ->  Lambda Functions
   StartCapitalSession:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: StartCapitalSessionFn
+      FunctionName: StartCapitalSession
       CodeUri: functions/capital/start-session/
       Handler: startSession.handler
-      Policies: 
+      Policies:
         - !Ref ReadParameterStoreValues
 
   SaveSession:
@@ -68,7 +98,7 @@ Resources:
           Destination:
             Id: SessionTable
           Permissions:
-            - Write
+            - Read
     Properties:
       FunctionName: GetDbSession
       CodeUri: functions/db/get-session/
@@ -81,13 +111,29 @@ Resources:
       CodeUri: functions/capital/validate-session/
       Handler: validateSession.handler
 
+  GetMarketCategories:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: GetMarketCategories
+      CodeUri: functions/capital/markets/
+      Handler: getMarketCategories.handler
+      Policies:
+        - !Ref ReadParameterStoreValues
+
+  ############################################################################  ->  API Gateways
+  CloudTraderGateway:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: CloudTraderGateway
+      StageName: dev
+
   ############################################################################  ->  Role/Policy for Lambda fn to use
-  ReadParameterStoreValues:       #--> Using explicit Policy definition. There is no standard Connector
+  ReadParameterStoreValues: #--> Using explicit Policy definition. There is no standard Connector
     Type: AWS::IAM::ManagedPolicy
     Properties:
-      ManagedPolicyName: ReadParameterStoreValues      
+      ManagedPolicyName: ReadParameterStoreValues
       PolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Action:
@@ -95,7 +141,7 @@ Resources:
               - ssm:GetParameter
               - ssm:GetParametersByPath
               # - ssm:PutParameter
-            Resource: '*'
+            Resource: "*"
 
   ############################################################################  ->  Layers
   ServicesLayer:
@@ -103,7 +149,7 @@ Resources:
     Properties:
       LayerName: ServicesLayer
       Description: All AWS services and utility functions used by Cloud-Trader app.
-      ContentUri: './layers/services'
+      ContentUri: "./layers/services"
       CompatibleRuntimes:
         - nodejs18.x
 
