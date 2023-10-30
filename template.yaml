@@ -74,6 +74,13 @@ Resources:
       CodeUri: functions/db/get-session/
       Handler: getDbSession.handler
 
+  ValidateSession:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: ValidateSession
+      CodeUri: functions/capital/validate-session/
+      Handler: validateSession.handler
+
   ############################################################################  ->  Role/Policy for Lambda fn to use
   ReadParameterStoreValues:       #--> Using explicit Policy definition. There is no standard Connector
     Type: AWS::IAM::ManagedPolicy
