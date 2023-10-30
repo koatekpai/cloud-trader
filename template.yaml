@@ -31,21 +31,52 @@ Globals:
         SESSION_ENDPOINT: /session
         SESSION_TABLE_NAME: Session
         SESSION_TABLE_KEY_VALUE: only1session
+        MARKET_CATEGORIES_ENDPOINT: /marketnavigation
 
 Resources:
   ############################################################################  ->  State Machines
+  MarketCategoriesSM:
+    Type: AWS::Serverless::StateMachine
+    Properties:
+      Name: MarketCategoriesSM
+      DefinitionUri: state-machines/market-categories.asl.yaml
+      Type: STANDARD
+      DefinitionSubstitutions:
+        StartCapitalSessionArn: !GetAtt StartCapitalSession.Arn
+        GetDbSessionArn: !GetAtt GetDbSession.Arn
+        ValidateSessionArn: !GetAtt ValidateSession.Arn
+        SaveSessionArn: !GetAtt SaveSession.Arn
+        GetMarketCategoriesArn: !GetAtt GetMarketCategories.Arn
+      Events:
+        GatewayTrigger:
+          Type: Api
+          Properties:
+            Path: /get-top-markets
+            Method: GET
+            RestApiId: !Ref CloudTraderGateway
+      Policies:
+        - LambdaInvokePolicy:
+            FunctionName: !Ref StartCapitalSession
+        - LambdaInvokePolicy:
+            FunctionName: !Ref GetDbSession
+        - LambdaInvokePolicy:
+            FunctionName: !Ref ValidateSession
+        - LambdaInvokePolicy:
+            FunctionName: !Ref SaveSession
+        - LambdaInvokePolicy:
+            FunctionName: !Ref GetMarketCategories
 
 
   ############################################################################  ->  Lambda Functions
   StartCapitalSession:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: StartCapitalSessionFn
+      FunctionName: StartCapitalSession
       CodeUri: functions/capital/start-session/
       Handler: startSession.handler
       Policies: 
         - !Ref ReadParameterStoreValues
-
+  
   SaveSession:
     Type: AWS::Serverless::Function
     Connectors:
@@ -80,6 +111,15 @@ Resources:
       FunctionName: ValidateSession
       CodeUri: functions/capital/validate-session/
       Handler: validateSession.handler
+  
+  GetMarketCategories:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: GetMarketCategories
+      CodeUri: functions/capital/markets/
+      Handler: getMarketCategories.handler
+      Policies: 
+        - !Ref ReadParameterStoreValues
 
   ############################################################################  ->  Role/Policy for Lambda fn to use
   ReadParameterStoreValues:       #--> Using explicit Policy definition. There is no standard Connector
