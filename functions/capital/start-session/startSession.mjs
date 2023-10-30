@@ -1,5 +1,6 @@
 /*global fetch*/
 import { getParameter } from '../../opt/parameterStore.mjs';
+import { nowTime } from "../../opt/common.mjs";
 
 const CT_IDENTIFIER = process.env.CT_IDENTIFIER;
 const CT_KEY = process.env.CT_KEY;
@@ -70,11 +71,13 @@ export const doStartSession = async (
 
         const CST = response.headers.get('CST');
         const TOKEN = response.headers.get('X-SECURITY-TOKEN');
+        const TIME_LAST_ACTIVE = nowTime();
 
         return {
             session: {
                 CST: CST,
-                TOKEN: TOKEN
+                TOKEN: TOKEN,
+                TIME_LAST_ACTIVE: TIME_LAST_ACTIVE
             },
             data: event.data
         }
