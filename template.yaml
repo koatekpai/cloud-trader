@@ -29,6 +29,7 @@ Globals:
         CT_PASSWORD: /cloud-trader/password # TODO: Each user would persist as account settings in DB
         CT_DEMO_URL: /cloud-trader/capitalDemoUrl # TODO: Each user would persist as account settings in DB
         SESSION_ENDPOINT: /session
+        MARKETS_ENDPOINT: /markets
         SESSION_TABLE_NAME: Session
         SESSION_TABLE_KEY_VALUE: only1session
         MARKET_CATEGORIES_ENDPOINT: /marketnavigation
@@ -97,6 +98,37 @@ Resources:
         - LambdaInvokePolicy:
             FunctionName: !Ref GetMarketSubNodes
 
+  MarketDetailsSM:
+    Type: AWS::Serverless::StateMachine
+    Properties:
+      Name: MarketDetailsSM
+      DefinitionUri: state-machines/market-details.asl.yaml
+      Type: STANDARD
+      DefinitionSubstitutions:
+        StartCapitalSessionArn: !GetAtt StartCapitalSession.Arn
+        GetDbSessionArn: !GetAtt GetDbSession.Arn
+        ValidateSessionArn: !GetAtt ValidateSession.Arn
+        SaveSessionArn: !GetAtt SaveSession.Arn
+        MarketDetailsArn: !GetAtt MarketDetails.Arn
+      Events:
+        GatewayTrigger:
+          Type: Api
+          Properties:
+            Path: /market-details
+            Method: GET
+            RestApiId: !Ref CloudTraderGateway
+      Policies:
+        - LambdaInvokePolicy:
+            FunctionName: !Ref StartCapitalSession
+        - LambdaInvokePolicy:
+            FunctionName: !Ref GetDbSession
+        - LambdaInvokePolicy:
+            FunctionName: !Ref ValidateSession
+        - LambdaInvokePolicy:
+            FunctionName: !Ref SaveSession
+        - LambdaInvokePolicy:
+            FunctionName: !Ref MarketDetails
+
   ############################################################################  ->  Lambda Functions
   StartCapitalSession:
     Type: AWS::Serverless::Function
@@ -157,6 +189,15 @@ Resources:
       FunctionName: GetMarketSubNodes
       CodeUri: functions/capital/markets/
       Handler: getMarketSubNodes.handler
+      Policies:
+        - !Ref ReadParameterStoreValues
+
+  MarketDetails:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: MarketDetails
+      CodeUri: functions/capital/markets/
+      Handler: marketDetails.handler
       Policies:
         - !Ref ReadParameterStoreValues
 
