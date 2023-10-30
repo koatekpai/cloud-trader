@@ -60,6 +60,20 @@ Resources:
       CodeUri: functions/db/save-session/
       Handler: saveSession.handler
 
+  GetDbSession:
+    Type: AWS::Serverless::Function
+    Connectors:
+      ToSessionTable:
+        Properties:
+          Destination:
+            Id: SessionTable
+          Permissions:
+            - Write
+    Properties:
+      FunctionName: GetDbSession
+      CodeUri: functions/db/get-session/
+      Handler: getDbSession.handler
+
   ############################################################################  ->  Role/Policy for Lambda fn to use
   ReadParameterStoreValues:       #--> Using explicit Policy definition. There is no standard Connector
     Type: AWS::IAM::ManagedPolicy
