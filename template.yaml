@@ -98,7 +98,7 @@ Resources:
           Destination:
             Id: SessionTable
           Permissions:
-            - Write
+            - Read
     Properties:
       FunctionName: GetDbSession
       CodeUri: functions/db/get-session/
