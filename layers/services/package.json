@@ -13,5 +13,10 @@
     "@aws-sdk/client-ssm": "^3.437.0",
     "@aws-sdk/lib-dynamodb": "^3.437.0",
     "moment": "^2.29.4"
+  },
+  "devDependencies": {
+    "chai": "^4.3.10",
+    "mocha": "^10.2.0",
+    "sinon": "^17.0.0"
   }
 }
